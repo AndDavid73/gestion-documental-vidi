@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Seguimiento · Portal VIDI{% endblock %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <p class="eyebrow">{{ documento.codigo_seguimiento or ("Documento #" ~ documento.id) }}</p>
+    <h1>{{ documento.nombre_original }}</h1>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline-secondary" href="/portal">Mis documentos</a>
+    <a class="btn btn-outline-success" href="/portal/documentos/{{ documento.id }}/descargar">Descargar</a>
+  </div>
+</section>
+
+<section class="document-strip mb-3">
+  <div>
+    <span>Estado</span>
+    <strong><span class="status-badge">{{ documento.estado }}</span></strong>
+  </div>
+  <div>
+    <span>Prioridad</span>
+    <strong>{{ documento.prioridad or "Normal" }}</strong>
+  </div>
+  <div>
+    <span>Fecha de carga</span>
+    <strong>{{ documento.fecha_subida.strftime("%Y-%m-%d") }}</strong>
+  </div>
+  <div>
+    <span>Requiere respuesta</span>
+    <strong>{{ "Sí" if documento.requiere_respuesta else "No" }}</strong>
+  </div>
+</section>
+
+<section class="detail-grid">
+  <div class="detail-panel">
+    <h2>Datos registrados</h2>
+    <dl>
+      <dt>Responsable</dt>
+      <dd>{{ documento.docente }}</dd>
+      <dt>Dependencia</dt>
+      <dd>{{ documento.dependencia }}</dd>
+      <dt>Tipo</dt>
+      <dd>{{ documento.tipo_documento }}</dd>
+      <dt>Proceso</dt>
+      <dd>{{ documento.proceso_institucional or "No registrado" }}</dd>
+      <dt>Entregable</dt>
+      <dd>{{ requisito.nombre if requisito else "Documento libre" }}</dd>
+      <dt>Proyecto/actividad</dt>
+      <dd>{{ documento.programa_proyecto or "No registrado" }}</dd>
+      <dt>Año / período</dt>
+      <dd>{{ documento.anio }} · {{ documento.periodo }}</dd>
+    </dl>
+  </div>
+
+  <div class="detail-panel">
+    <h2>Qué falta o conviene completar</h2>
+    {% if pendientes %}
+      <div class="missing-list">
+        {% for pendiente in pendientes %}
+          <span>{{ pendiente }}</span>
+        {% endfor %}
+      </div>
+      <p class="text-muted mt-3 mb-0">Estos datos ayudan a clasificar mejor el documento para reportes y evaluación institucional.</p>
+    {% else %}
+      <p class="mb-0"><span class="complete-badge">Información completa</span></p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="detail-grid mt-3">
+  <div class="detail-panel">
+    <h2>Descripción enviada</h2>
+    <p class="mb-0">{{ documento.descripcion or "Sin descripción registrada." }}</p>
+  </div>
+
+  <div class="detail-panel">
+    <h2>Respuesta de supervisión</h2>
+    <dl>
+      <dt>Validador</dt>
+      <dd>{{ documento.usuario_validador or "Pendiente" }}</dd>
+      <dt>Fecha validación</dt>
+      <dd>{{ documento.fecha_validacion.strftime("%Y-%m-%d %H:%M") if documento.fecha_validacion else "Sin validar" }}</dd>
+    </dl>
+    <hr>
+    <p class="mb-0">{{ documento.observacion_validacion or "Aún no hay observaciones de supervisión." }}</p>
+  </div>
+</section>
+{% endblock %}

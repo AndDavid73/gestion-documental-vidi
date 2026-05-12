@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Administración · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="admin-hero">
+  <div>
+    <p class="eyebrow">Web administrativa VIDI</p>
+    <h1>Tablero de gestión documental</h1>
+    <p class="lead">Indicadores de recepción, validación, avance documental y trazabilidad por dependencia.</p>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline-secondary" href="/portal/login">Acceso de usuarios</a>
+    <a class="btn btn-outline-secondary" href="/admin/sincronizacion">Sincronización</a>
+    <a class="btn btn-primary" href="/admin/documentos">Abrir bandeja</a>
+  </div>
+</section>
+
+<section class="kpi-grid mb-4">
+  <div class="kpi-card kpi-primary">
+    <span>Total recibido</span>
+    <strong>{{ metricas.total }}</strong>
+    <small>Documentos registrados</small>
+  </div>
+  <div class="kpi-card">
+    <span>Pendientes</span>
+    <strong>{{ metricas.pendientes }}</strong>
+    <small>Esperan primera revisión</small>
+  </div>
+  <div class="kpi-card">
+    <span>Corrección</span>
+    <strong>{{ metricas.correccion }}</strong>
+    <small>Requieren acción del usuario</small>
+  </div>
+  <div class="kpi-card kpi-alert">
+    <span>Urgentes</span>
+    <strong>{{ metricas.urgentes }}</strong>
+    <small>Priorizados por seguimiento</small>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">OneDrive sincronizados</span>
+      <strong>{{ metricas.sync_synced }}</strong>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Solo local</span>
+      <strong>{{ metricas.sync_local }}</strong>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Errores sync</span>
+      <strong>{{ metricas.sync_error }}</strong>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Proveedor activo</span>
+      <strong class="metric-word">{{ current_user.rol }}</strong>
+    </div>
+  </div>
+</section>
+
+<section class="bi-grid">
+  <div class="bi-card">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Validación</p>
+        <h2>Documentos por estado</h2>
+      </div>
+    </div>
+    <div class="bar-list">
+      {% for item in serie_estado %}
+        <div class="bar-row">
+          <div class="bar-label"><span>{{ item.label }}</span><strong>{{ item.value }}</strong></div>
+          <div class="bar-track"><span style="width: {{ item.percent }}%"></span></div>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Sin datos.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bi-card">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Dependencias</p>
+        <h2>Recepción por unidad</h2>
+      </div>
+    </div>
+    <div class="bar-list">
+      {% for item in serie_dependencia %}
+        <div class="bar-row">
+          <div class="bar-label"><span>{{ item.label }}</span><strong>{{ item.value }}</strong></div>
+          <div class="bar-track bar-track-blue"><span style="width: {{ item.percent }}%"></span></div>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Sin datos.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bi-card">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Tipos documentales</p>
+        <h2>Volumen por categoría</h2>
+      </div>
+    </div>
+    <div class="bar-list">
+      {% for item in serie_tipo %}
+        <div class="bar-row">
+          <div class="bar-label"><span>{{ item.label }}</span><strong>{{ item.value }}</strong></div>
+          <div class="bar-track bar-track-red"><span style="width: {{ item.percent }}%"></span></div>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">Sin datos.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bi-card">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Cumplimiento docente</p>
+        <h2>Entregables requeridos</h2>
+      </div>
+    </div>
+    <div class="requirement-compliance-list">
+      {% for item in cumplimiento_requisitos %}
+        <div class="compliance-row">
+          <div>
+            <strong>{{ item.requisito.nombre }}</strong>
+            <span>{{ item.cargados }} cargado(s) · {{ item.validados }} validado(s)</span>
+          </div>
+          <div class="mini-progress">
+            <span style="width: {{ item.porcentaje_carga }}%"></span>
+          </div>
+          <em>{{ item.porcentaje_carga }}%</em>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="table-panel mt-4">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">Bandeja reciente</p>
+      <h2>Últimos documentos recibidos</h2>
+    </div>
+    <a class="btn btn-outline-primary" href="/admin/documentos">Ver todos</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Documento</th>
+          <th>Dependencia</th>
+          <th>Tipo</th>
+          <th>Prioridad</th>
+          <th>Estado</th>
+          <th class="text-end">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for documento in documentos_recientes %}
+          <tr>
+            <td>{{ documento.codigo_seguimiento or ("#" ~ documento.id) }}</td>
+            <td>
+              <a class="table-link" href="/admin/documentos/{{ documento.id }}">{{ documento.nombre_original }}</a>
+              <div class="small text-muted">{{ documento.docente }}</div>
+            </td>
+            <td>{{ documento.dependencia }}</td>
+            <td>{{ documento.tipo_documento }}</td>
+            <td><span class="priority-badge priority-{{ (documento.prioridad or 'Normal')|lower }}">{{ documento.prioridad or "Normal" }}</span></td>
+            <td><span class="status-badge">{{ documento.estado }}</span></td>
+            <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="/admin/documentos/{{ documento.id }}/validar">Revisar</a></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="7" class="empty-state">No hay documentos en la bandeja.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

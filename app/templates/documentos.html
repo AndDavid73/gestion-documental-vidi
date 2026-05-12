@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Documentos · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <p class="eyebrow">Repositorio operativo</p>
+    <h1>Documentos registrados</h1>
+  </div>
+  <a class="btn btn-primary" href="/subir">Subir documento</a>
+</section>
+
+{% if mensaje %}
+  <div class="alert alert-success">{{ mensaje }}</div>
+{% endif %}
+
+<form class="filter-panel" method="get" action="/documentos">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-2">
+      <label class="form-label" for="anio">Año</label>
+      <input class="form-control" id="anio" name="anio" type="number" min="2000" max="2100" value="{{ filtros.anio }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="dependencia">Dependencia</label>
+      <select class="form-select" id="dependencia" name="dependencia">
+        <option value="">Todas</option>
+        {% for dependencia in dependencias %}
+          <option value="{{ dependencia }}" {% if filtros.dependencia == dependencia %}selected{% endif %}>{{ dependencia }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label" for="tipo_documento">Tipo</label>
+      <select class="form-select" id="tipo_documento" name="tipo_documento">
+        <option value="">Todos</option>
+        {% for tipo in tipos_documento %}
+          <option value="{{ tipo }}" {% if filtros.tipo_documento == tipo %}selected{% endif %}>{{ tipo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label" for="estado">Estado</label>
+      <select class="form-select" id="estado" name="estado">
+        <option value="">Todos</option>
+        {% for estado in estados %}
+          <option value="{{ estado }}" {% if filtros.estado == estado %}selected{% endif %}>{{ estado }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="q">Buscar</label>
+      <input class="form-control" id="q" name="q" type="search" value="{{ filtros.q }}" placeholder="Docente, correo o archivo">
+    </div>
+    <div class="col-12 d-flex gap-2 justify-content-end">
+      <a class="btn btn-light" href="/documentos">Limpiar</a>
+      <button class="btn btn-outline-primary" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<div class="table-panel">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Documento</th>
+          <th>Docente</th>
+          <th>Dependencia</th>
+          <th>Tipo</th>
+          <th>Año</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for documento in documentos %}
+          <tr>
+            <td class="text-muted">#{{ documento.id }}</td>
+            <td>
+              <a class="table-link" href="/documentos/{{ documento.id }}">{{ documento.nombre_original }}</a>
+              <div class="small text-muted">{{ documento.nombre_guardado }}</div>
+            </td>
+            <td>
+              {{ documento.docente }}
+              <div class="small text-muted">{{ documento.correo }}</div>
+            </td>
+            <td>{{ documento.dependencia }}</td>
+            <td>{{ documento.tipo_documento }}</td>
+            <td>{{ documento.anio }}</td>
+            <td><span class="status-badge">{{ documento.estado }}</span></td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <a class="btn btn-outline-secondary" href="/documentos/{{ documento.id }}">Detalle</a>
+                <a class="btn btn-outline-primary" href="/documentos/{{ documento.id }}/validar">Validar</a>
+                <a class="btn btn-outline-success" href="/documentos/{{ documento.id }}/descargar">Descargar</a>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8" class="empty-state">No hay documentos registrados con los filtros actuales.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

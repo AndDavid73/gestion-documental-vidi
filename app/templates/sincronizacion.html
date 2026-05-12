@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Sincronización · Administración VIDI{% endblock %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <p class="eyebrow">OneDrive / almacenamiento</p>
+    <h1>Sincronización documental</h1>
+  </div>
+  <div class="header-actions">
+    <a class="btn btn-outline-secondary" href="/admin">Panel</a>
+    <a class="btn btn-primary" href="/admin/documentos">Bandeja</a>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Solo local</span>
+      <strong>{{ metricas.sync_local }}</strong>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Sincronizados</span>
+      <strong>{{ metricas.sync_synced }}</strong>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Con error</span>
+      <strong>{{ metricas.sync_error }}</strong>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Pendientes</span>
+      <strong>{{ metricas.sync_pending }}</strong>
+    </div>
+  </div>
+</section>
+
+<form class="filter-panel" method="get" action="/admin/sincronizacion">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label" for="estado">Estado de sincronización</label>
+      <select class="form-select" id="estado" name="estado">
+        <option value="">Todos</option>
+        <option value="local" {% if estado == "local" %}selected{% endif %}>Solo local</option>
+        <option value="synced" {% if estado == "synced" %}selected{% endif %}>Sincronizado</option>
+        <option value="error" {% if estado == "error" %}selected{% endif %}>Con error</option>
+        <option value="pending" {% if estado == "pending" %}selected{% endif %}>Pendiente</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <a class="btn btn-light w-50" href="/admin/sincronizacion">Limpiar</a>
+      <button class="btn btn-outline-primary w-50" type="submit">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<section class="table-panel">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Documento</th>
+          <th>Estado sync</th>
+          <th>OneDrive</th>
+          <th>Error</th>
+          <th class="text-end">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for documento in documentos %}
+          <tr>
+            <td>{{ documento.codigo_seguimiento or ("#" ~ documento.id) }}</td>
+            <td>
+              <a class="table-link" href="/admin/documentos/{{ documento.id }}">{{ documento.nombre_original }}</a>
+              <div class="small text-muted">{{ documento.ruta_archivo }}</div>
+            </td>
+            <td><span class="sync-badge sync-{{ documento.sync_status or 'local' }}">{{ documento.sync_status or "local" }}</span></td>
+            <td>
+              {% if documento.onedrive_web_url %}
+                <a href="{{ documento.onedrive_web_url }}" target="_blank" rel="noopener">Abrir en OneDrive</a>
+              {% else %}
+                <span class="text-muted">Sin URL</span>
+              {% endif %}
+            </td>
+            <td class="small text-muted">{{ documento.sync_error or "" }}</td>
+            <td class="text-end">
+              <form method="post" action="/admin/documentos/{{ documento.id }}/sincronizar">
+                <button class="btn btn-sm btn-outline-primary" type="submit">Reintentar</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" class="empty-state">No hay documentos para mostrar.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

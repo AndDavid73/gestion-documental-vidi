@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Portal de carga · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="portal-header">
+  <div>
+    <p class="eyebrow">Portal de recepción documental</p>
+    <h1>Nueva carga documental</h1>
+    <p class="lead">
+      Use este formulario para enviar artículos, informes, evidencias, PAP, PAC,
+      reportes u otros documentos relacionados con procesos de investigación.
+    </p>
+  </div>
+  <div class="portal-link-box">
+    <span>Sesión activa</span>
+    <strong>{{ usuario.nombre }}</strong>
+  </div>
+</section>
+
+{% if requisito_preseleccionado %}
+  <section class="selected-requirement mb-3">
+    <span>Documento requerido seleccionado</span>
+    <strong>{{ requisito_preseleccionado.nombre }}</strong>
+    <p>{{ requisito_preseleccionado.descripcion }}</p>
+  </section>
+{% endif %}
+
+<form class="form-panel form-panel-large" method="post" action="/portal/nuevo" enctype="multipart/form-data">
+  <section class="form-section">
+    <div class="form-section-title">
+      <span>1</span>
+      <div>
+        <h2>Responsable de la carga</h2>
+        <p>Datos de quien entrega el documento.</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="docente">Nombre del docente o responsable</label>
+        <input class="form-control" id="docente" name="docente" type="text" required maxlength="180" value="{{ usuario.nombre }}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="correo">Correo institucional</label>
+        <input class="form-control" id="correo" name="correo" type="email" required maxlength="180" value="{{ usuario.correo }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="cargo_responsable">Cargo o rol</label>
+        <input class="form-control" id="cargo_responsable" name="cargo_responsable" type="text" maxlength="180" placeholder="Ej. Docente investigador">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="telefono">Teléfono de contacto</label>
+        <input class="form-control" id="telefono" name="telefono" type="text" maxlength="80">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="identificacion">Identificación opcional</label>
+        <input class="form-control" id="identificacion" name="identificacion" type="text" maxlength="80">
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="form-section-title">
+      <span>2</span>
+      <div>
+        <h2>Clasificación institucional</h2>
+        <p>Metadatos que luego permitirán filtrar, auditar y reportar.</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-12">
+        <label class="form-label" for="requisito_codigo">Documento requerido o carga libre</label>
+        <select class="form-select" id="requisito_codigo" name="requisito_codigo">
+          <option value="">Otro documento no listado</option>
+          {% for requisito in documentos_requeridos %}
+            <option
+              value="{{ requisito.codigo }}"
+              {% if requisito_preseleccionado and requisito_preseleccionado.codigo == requisito.codigo %}selected{% endif %}
+            >
+              {{ requisito.nombre }} · {{ requisito.periodicidad }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="dependencia">Dependencia</label>
+        <select class="form-select" id="dependencia" name="dependencia" required>
+          {% for dependencia in dependencias %}
+            <option value="{{ dependencia }}">{{ dependencia }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="proceso_institucional">Proceso institucional</label>
+        <select class="form-select" id="proceso_institucional" name="proceso_institucional">
+          <option value="">Seleccione si aplica</option>
+          {% for proceso in procesos_institucionales %}
+            <option value="{{ proceso }}" {% if requisito_preseleccionado and requisito_preseleccionado.proceso == proceso %}selected{% endif %}>{{ proceso }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="tipo_documento">Tipo de documento</label>
+        <select class="form-select" id="tipo_documento" name="tipo_documento" required>
+          {% for tipo in tipos_documento %}
+            <option value="{{ tipo }}" {% if requisito_preseleccionado and requisito_preseleccionado.tipo_documento == tipo %}selected{% endif %}>{{ tipo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="anio">Año</label>
+        <input class="form-control" id="anio" name="anio" type="number" required min="2000" max="2100" value="{{ anio_actual }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="periodo">Período</label>
+        <input class="form-control" id="periodo" name="periodo" type="text" required maxlength="80" placeholder="Ej. Semestre 1">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="fecha_documento">Fecha del documento</label>
+        <input class="form-control" id="fecha_documento" name="fecha_documento" type="date">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="programa_proyecto">Programa, proyecto o actividad</label>
+        <input class="form-control" id="programa_proyecto" name="programa_proyecto" type="text" maxlength="180" placeholder="Ej. Proyecto de investigación, PAP, PAC">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="linea_investigacion">Línea de investigación o eje</label>
+        <input class="form-control" id="linea_investigacion" name="linea_investigacion" type="text" maxlength="180">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="numero_documento">Número de oficio, acta o referencia</label>
+        <input class="form-control" id="numero_documento" name="numero_documento" type="text" maxlength="120">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="nivel_confidencialidad">Nivel de confidencialidad</label>
+        <select class="form-select" id="nivel_confidencialidad" name="nivel_confidencialidad">
+          {% for nivel in niveles_confidencialidad %}
+            <option value="{{ nivel }}">{{ nivel }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="prioridad">Prioridad inicial</label>
+        <select class="form-select" id="prioridad" name="prioridad">
+          {% for prioridad in prioridades %}
+            <option value="{{ prioridad }}">{{ prioridad }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="form-section-title">
+      <span>3</span>
+      <div>
+        <h2>Archivo y descripción</h2>
+        <p>El archivo se guardará en almacenamiento local; la base solo conserva metadatos y ruta.</p>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="archivo">Archivo</label>
+        <input class="form-control" id="archivo" name="archivo" type="file" required>
+      </div>
+      <div class="col-md-6 d-flex align-items-end">
+        <div class="form-check mb-2">
+          <input class="form-check-input" id="requiere_respuesta" name="requiere_respuesta" type="checkbox">
+          <label class="form-check-label" for="requiere_respuesta">Requiere respuesta o seguimiento del Vicerrectorado</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="descripcion">Descripción del documento</label>
+        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Resumen breve del contenido, objetivo o contexto institucional."></textarea>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="palabras_clave">Palabras clave</label>
+        <input class="form-control" id="palabras_clave" name="palabras_clave" type="text" placeholder="Ej. artículo, evidencia, proyecto, acreditación">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="observacion_usuario">Observación para el validador</label>
+        <input class="form-control" id="observacion_usuario" name="observacion_usuario" type="text" placeholder="Nota adicional para revisión interna">
+      </div>
+    </div>
+  </section>
+
+  <div class="form-actions sticky-actions">
+    <a class="btn btn-light" href="/portal">Cancelar</a>
+    <button class="btn btn-primary btn-lg" type="submit">Enviar documento</button>
+  </div>
+</form>
+{% endblock %}

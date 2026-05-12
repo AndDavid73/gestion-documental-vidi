@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Subir documento · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <p class="eyebrow">Carga documental</p>
+    <h1>Subir documento</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="/documentos">Consultar registros</a>
+</section>
+
+<form class="form-panel" method="post" action="/subir" enctype="multipart/form-data">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label" for="docente">Nombre del docente o responsable</label>
+      <input class="form-control" id="docente" name="docente" type="text" required maxlength="180">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="correo">Correo institucional</label>
+      <input class="form-control" id="correo" name="correo" type="email" required maxlength="180">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="dependencia">Dependencia</label>
+      <select class="form-select" id="dependencia" name="dependencia" required>
+        {% for dependencia in dependencias %}
+          <option value="{{ dependencia }}">{{ dependencia }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="tipo_documento">Tipo de documento</label>
+      <select class="form-select" id="tipo_documento" name="tipo_documento" required>
+        {% for tipo in tipos_documento %}
+          <option value="{{ tipo }}">{{ tipo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label" for="anio">Año</label>
+      <input class="form-control" id="anio" name="anio" type="number" required min="2000" max="2100" value="{{ anio_actual }}">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="periodo">Período</label>
+      <input class="form-control" id="periodo" name="periodo" type="text" required maxlength="80" placeholder="Ej. Semestre 1">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label" for="archivo">Archivo</label>
+      <input class="form-control" id="archivo" name="archivo" type="file" required>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label" for="observacion">Observación opcional</label>
+      <textarea class="form-control" id="observacion" name="observacion" rows="4" placeholder="Contexto, nota del usuario o detalle relevante para el validador."></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <a class="btn btn-light" href="/">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Guardar documento</button>
+  </div>
+</form>
+{% endblock %}
+

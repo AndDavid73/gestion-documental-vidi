@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <p class="eyebrow">{{ documento.codigo_seguimiento or ("Documento #" ~ documento.id) }}</p>
+    <h1>{{ documento.nombre_original }}</h1>
+  </div>
+  <div class="d-flex flex-wrap gap-2">
+    <a class="btn btn-outline-secondary" href="/admin/documentos">Volver a bandeja</a>
+    <a class="btn btn-primary" href="/admin/documentos/{{ documento.id }}/validar">Validar</a>
+  </div>
+</section>
+
+<section class="document-strip mb-3">
+  <div>
+    <span>Estado</span>
+    <strong><span class="status-badge">{{ documento.estado }}</span></strong>
+  </div>
+  <div>
+    <span>Prioridad</span>
+    <strong><span class="priority-badge priority-{{ (documento.prioridad or 'Normal')|lower }}">{{ documento.prioridad or "Normal" }}</span></strong>
+  </div>
+  <div>
+    <span>Confidencialidad</span>
+    <strong>{{ documento.nivel_confidencialidad or "No definida" }}</strong>
+  </div>
+  <div>
+    <span>Requiere respuesta</span>
+    <strong>{{ "Sí" if documento.requiere_respuesta else "No" }}</strong>
+  </div>
+</section>
+
+<section class="document-strip mb-3">
+  <div>
+    <span>Sincronización</span>
+    <strong><span class="sync-badge sync-{{ documento.sync_status or 'local' }}">{{ documento.sync_status or "local" }}</span></strong>
+  </div>
+  <div>
+    <span>OneDrive</span>
+    <strong>
+      {% if documento.onedrive_web_url %}
+        <a href="{{ documento.onedrive_web_url }}" target="_blank" rel="noopener">Abrir archivo</a>
+      {% else %}
+        No sincronizado
+      {% endif %}
+    </strong>
+  </div>
+  <div>
+    <span>Fecha sync</span>
+    <strong>{{ documento.fecha_sync.strftime("%Y-%m-%d %H:%M") if documento.fecha_sync else "Sin fecha" }}</strong>
+  </div>
+  <div>
+    <span>Proveedor</span>
+    <strong>{{ documento.storage_provider }}</strong>
+  </div>
+</section>
+
+{% if documento.sync_error %}
+  <div class="alert alert-warning">{{ documento.sync_error }}</div>
+{% endif %}
+
+{% if pendientes %}
+  <section class="detail-panel mb-3">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Calidad del registro</p>
+        <h2>Datos recomendados pendientes</h2>
+      </div>
+    </div>
+    <div class="missing-list">
+      {% for pendiente in pendientes %}
+        <span>{{ pendiente }}</span>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+<section class="detail-grid">
+  <div class="detail-panel">
+    <h2>Responsable</h2>
+    <dl>
+      <dt>Nombre</dt>
+      <dd>{{ documento.docente }}</dd>
+      <dt>Correo</dt>
+      <dd>{{ documento.correo }}</dd>
+      <dt>Cargo o rol</dt>
+      <dd>{{ documento.cargo_responsable or "No registrado" }}</dd>
+      <dt>Teléfono</dt>
+      <dd>{{ documento.telefono or "No registrado" }}</dd>
+      <dt>Identificación</dt>
+      <dd>{{ documento.identificacion or "No registrada" }}</dd>
+    </dl>
+  </div>
+
+  <div class="detail-panel">
+    <h2>Clasificación</h2>
+    <dl>
+      <dt>Dependencia</dt>
+      <dd>{{ documento.dependencia }}</dd>
+      <dt>Proceso</dt>
+      <dd>{{ documento.proceso_institucional or "No clasificado" }}</dd>
+      <dt>Entregable</dt>
+      <dd>{{ requisito.nombre if requisito else "Documento libre" }}</dd>
+      <dt>Tipo documental</dt>
+      <dd>{{ documento.tipo_documento }}</dd>
+      <dt>Año y período</dt>
+      <dd>{{ documento.anio }} · {{ documento.periodo }}</dd>
+      <dt>Fecha documento</dt>
+      <dd>{{ documento.fecha_documento.strftime("%Y-%m-%d") if documento.fecha_documento else "No registrada" }}</dd>
+    </dl>
+  </div>
+
+  <div class="detail-panel">
+    <h2>Contexto institucional</h2>
+    <dl>
+      <dt>Programa/proyecto</dt>
+      <dd>{{ documento.programa_proyecto or "No registrado" }}</dd>
+      <dt>Línea/eje</dt>
+      <dd>{{ documento.linea_investigacion or "No registrada" }}</dd>
+      <dt>Número/referencia</dt>
+      <dd>{{ documento.numero_documento or "No registrado" }}</dd>
+      <dt>Palabras clave</dt>
+      <dd>{{ documento.palabras_clave or "No registradas" }}</dd>
+    </dl>
+  </div>
+
+  <div class="detail-panel">
+    <h2>Archivo</h2>
+    <dl>
+      <dt>Nombre guardado</dt>
+      <dd>{{ documento.nombre_guardado }}</dd>
+      <dt>Proveedor</dt>
+      <dd>{{ documento.storage_provider }}</dd>
+      <dt>Fecha de subida</dt>
+      <dd>{{ documento.fecha_subida.strftime("%Y-%m-%d %H:%M") }}</dd>
+      <dt>Ruta</dt>
+      <dd class="path-text">{{ documento.ruta_archivo }}</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="detail-grid mt-3">
+  <div class="detail-panel">
+    <h2>Descripción del usuario</h2>
+    <p class="mb-3">{{ documento.descripcion or "Sin descripción registrada." }}</p>
+    <h2>Observación de carga</h2>
+    <p class="mb-0">{{ documento.observacion_usuario or "Sin observaciones del usuario." }}</p>
+  </div>
+
+  <div class="detail-panel">
+    <h2>Validación</h2>
+    <dl>
+      <dt>Validador</dt>
+      <dd>{{ documento.usuario_validador or "No registrado" }}</dd>
+      <dt>Fecha validación</dt>
+      <dd>{{ documento.fecha_validacion.strftime("%Y-%m-%d %H:%M") if documento.fecha_validacion else "Sin validar" }}</dd>
+    </dl>
+    <hr>
+    <p class="mb-0">{{ documento.observacion_validacion or documento.observacion or "Sin observaciones de validación." }}</p>
+  </div>
+</section>
+
+<div class="form-actions mt-3">
+  <a class="btn btn-outline-success" href="/admin/documentos/{{ documento.id }}/descargar">Descargar archivo</a>
+</div>
+{% endblock %}

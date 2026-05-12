@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Validar documento · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="page-title">
+  <div>
+    <p class="eyebrow">Validación · {{ documento.codigo_seguimiento or ("#" ~ documento.id) }}</p>
+    <h1>{{ documento.nombre_original }}</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="/admin/documentos/{{ documento.id }}">Ver detalle</a>
+</section>
+
+<section class="review-layout">
+  <aside class="review-summary">
+    <h2>Ficha rápida</h2>
+    <dl>
+      <dt>Responsable</dt>
+      <dd>{{ documento.docente }}</dd>
+      <dt>Correo</dt>
+      <dd>{{ documento.correo }}</dd>
+      <dt>Dependencia</dt>
+      <dd>{{ documento.dependencia }}</dd>
+      <dt>Tipo</dt>
+      <dd>{{ documento.tipo_documento }}</dd>
+      <dt>Proceso</dt>
+      <dd>{{ documento.proceso_institucional or "No clasificado" }}</dd>
+      <dt>Año / período</dt>
+      <dd>{{ documento.anio }} · {{ documento.periodo }}</dd>
+      <dt>Archivo</dt>
+      <dd class="path-text">{{ documento.ruta_archivo }}</dd>
+    </dl>
+    {% if pendientes %}
+      <div class="validation-helper compact-helper">
+        <strong>Datos pendientes</strong>
+        <ul>
+          {% for pendiente in pendientes %}
+            <li>{{ pendiente }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    <a class="btn btn-outline-success w-100" href="/admin/documentos/{{ documento.id }}/descargar">Descargar archivo</a>
+  </aside>
+
+  <form class="form-panel review-form" method="post" action="/admin/documentos/{{ documento.id }}/validar">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="estado">Estado de validación</label>
+        <select class="form-select" id="estado" name="estado" required>
+          {% for estado in estados %}
+            <option value="{{ estado }}" {% if documento.estado == estado %}selected{% endif %}>{{ estado }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="prioridad">Prioridad de atención</label>
+        <select class="form-select" id="prioridad" name="prioridad">
+          {% for prioridad in prioridades %}
+            <option value="{{ prioridad }}" {% if (documento.prioridad or "Normal") == prioridad %}selected{% endif %}>{{ prioridad }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-8">
+        <label class="form-label" for="usuario_validador">Usuario validador</label>
+        <input class="form-control" id="usuario_validador" name="usuario_validador" type="text" maxlength="180" value="{{ documento.usuario_validador or '' }}" placeholder="Nombre del validador o área responsable">
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <div class="form-check mb-2">
+          <input class="form-check-input" id="requiere_respuesta" name="requiere_respuesta" type="checkbox" {% if documento.requiere_respuesta %}checked{% endif %}>
+          <label class="form-check-label" for="requiere_respuesta">Requiere respuesta</label>
+        </div>
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="observacion_validacion">Observaciones de validación</label>
+        <textarea class="form-control" id="observacion_validacion" name="observacion_validacion" rows="7" placeholder="Registre hallazgos, requisitos pendientes, motivo de aprobación, corrección solicitada o decisión final.">{{ documento.observacion_validacion or documento.observacion or '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="validation-helper">
+      <strong>Criterios sugeridos de revisión</strong>
+      <ul>
+        <li>El archivo corresponde al tipo documental declarado.</li>
+        <li>La dependencia, año, período y proceso institucional son correctos.</li>
+        <li>El documento es legible y suficiente como evidencia.</li>
+        <li>La observación explica claramente cualquier corrección solicitada.</li>
+      </ul>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-light" href="/admin/documentos/{{ documento.id }}">Cancelar</a>
+      <button class="btn btn-primary" type="submit">Guardar validación</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

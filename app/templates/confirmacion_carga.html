@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Documento enviado · Gestión Documental VIDI{% endblock %}
+
+{% block content %}
+<section class="confirmation-panel">
+  <p class="eyebrow">Documento recibido</p>
+  <h1>La carga fue registrada correctamente</h1>
+  <p class="lead">
+    El documento quedó en estado <strong>{{ documento.estado }}</strong>. Conserve
+    el código de seguimiento para cualquier consulta posterior.
+  </p>
+
+  <div class="tracking-box">
+    <span>Código de seguimiento</span>
+    <strong>{{ documento.codigo_seguimiento or ("#" ~ documento.id) }}</strong>
+  </div>
+
+  {% if pendientes %}
+    <div class="alert alert-warning mt-3">
+      El documento fue recibido, pero conviene completar después:
+      {{ pendientes|join(", ") }}.
+    </div>
+  {% endif %}
+
+  <dl class="confirmation-details">
+    <dt>Documento</dt>
+    <dd>{{ documento.nombre_original }}</dd>
+    <dt>Responsable</dt>
+    <dd>{{ documento.docente }}</dd>
+    <dt>Dependencia</dt>
+    <dd>{{ documento.dependencia }}</dd>
+    <dt>Tipo</dt>
+    <dd>{{ documento.tipo_documento }}</dd>
+    <dt>Año / período</dt>
+    <dd>{{ documento.anio }} · {{ documento.periodo }}</dd>
+  </dl>
+
+  <div class="form-actions justify-content-start">
+    <a class="btn btn-primary" href="/portal/nuevo">Cargar otro documento</a>
+    <a class="btn btn-outline-secondary" href="/portal">Mis documentos</a>
+  </div>
+</section>
+{% endblock %}

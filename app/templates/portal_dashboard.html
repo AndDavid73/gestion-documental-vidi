@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Mis documentos · Portal VIDI{% endblock %}
+
+{% block content %}
+<section class="portal-welcome">
+  <div>
+    <p class="eyebrow">Portal docente</p>
+    <h1>Hola, {{ usuario.nombre }}</h1>
+    <p class="lead">Revise sus entregables requeridos, cargue evidencias y controle el avance de validación.</p>
+  </div>
+  <a class="btn btn-primary btn-lg" href="/portal/nuevo">Cargar documento libre</a>
+</section>
+
+<section class="progress-hero mb-4">
+  <div>
+    <p class="eyebrow">Avance de entregables</p>
+    <h2>{{ metricas.porcentaje_carga }}% cargado</h2>
+    <p>{{ metricas.requeridos_cargados }} de {{ metricas.requeridos_total }} documentos requeridos registrados.</p>
+    <div class="progress-track">
+      <span style="width: {{ metricas.porcentaje_carga }}%"></span>
+    </div>
+  </div>
+  <div>
+    <p class="eyebrow">Validación</p>
+    <h2>{{ metricas.porcentaje_validacion }}% validado</h2>
+    <p>{{ metricas.requeridos_validados }} entregables aprobados o validados para repositorio.</p>
+    <div class="progress-track progress-track-blue">
+      <span style="width: {{ metricas.porcentaje_validacion }}%"></span>
+    </div>
+  </div>
+</section>
+
+<section class="row g-3 mb-4">
+  <div class="col-md-2">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Total cargado</span>
+      <strong>{{ metricas.total }}</strong>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Requeridos cargados</span>
+      <strong>{{ metricas.requeridos_cargados }}</strong>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Faltantes</span>
+      <strong>{{ metricas.requeridos_faltantes }}</strong>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Corrección</span>
+      <strong>{{ metricas.correccion }}</strong>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Observados</span>
+      <strong>{{ metricas.observados }}</strong>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="metric-card compact-metric">
+      <span class="metric-label">Finalizados</span>
+      <strong>{{ metricas.finalizados }}</strong>
+    </div>
+  </div>
+</section>
+
+<section class="requirement-board mb-4">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">Lista de documentos esperados</p>
+      <h2>Entregables del período</h2>
+    </div>
+  </div>
+  <div class="requirement-grid">
+    {% for item in progreso_requisitos["items"] %}
+      {% set requisito = item.requisito %}
+      <article class="requirement-card {% if item.documento %}is-uploaded{% else %}is-missing{% endif %}">
+        <div class="requirement-card-head">
+          <span>{{ requisito.periodicidad }}</span>
+          {% if item.documento %}
+            <strong class="complete-badge">Cargado</strong>
+          {% else %}
+            <strong class="missing-badge">Pendiente</strong>
+          {% endif %}
+        </div>
+        <h3>{{ requisito.nombre }}</h3>
+        <p>{{ requisito.descripcion }}</p>
+        <dl>
+          <dt>Tipo</dt>
+          <dd>{{ requisito.tipo_documento }}</dd>
+          <dt>Proceso</dt>
+          <dd>{{ requisito.proceso }}</dd>
+        </dl>
+        {% if item.documento %}
+          <div class="requirement-status">
+            <span>Estado</span>
+            <strong>{{ item.documento.estado }}</strong>
+          </div>
+          <a class="btn btn-sm btn-outline-primary" href="/portal/documentos/{{ item.documento.id }}">Ver seguimiento</a>
+        {% else %}
+          <a class="btn btn-sm btn-primary" href="/portal/nuevo?requisito={{ requisito.codigo }}">Cargar este documento</a>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="table-panel">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">Historial</p>
+      <h2>Todos mis documentos cargados</h2>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Documento</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th>Qué falta</th>
+          <th class="text-end">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in documentos_con_pendientes %}
+          {% set documento = item.documento %}
+          <tr>
+            <td class="text-muted">{{ documento.codigo_seguimiento or ("#" ~ documento.id) }}</td>
+            <td>
+              <a class="table-link" href="/portal/documentos/{{ documento.id }}">{{ documento.nombre_original }}</a>
+              <div class="small text-muted">{{ documento.dependencia }} · {{ documento.anio }} · {{ documento.periodo }}</div>
+            </td>
+            <td>{{ documento.tipo_documento }}</td>
+            <td><span class="status-badge">{{ documento.estado }}</span></td>
+            <td>
+              {% if item.pendientes %}
+                <span class="missing-badge">{{ item.pendientes|length }} dato(s)</span>
+                <div class="small text-muted">{{ item.pendientes[:2]|join(", ") }}{% if item.pendientes|length > 2 %}...{% endif %}</div>
+              {% else %}
+                <span class="complete-badge">Completo</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="/portal/documentos/{{ documento.id }}">Ver seguimiento</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" class="empty-state">Todavía no tiene documentos cargados.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
